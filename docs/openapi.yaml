@@ -1,0 +1,558 @@
+openapi: 3.0.1
+info:
+  title: 기본 모듈
+  description: ''
+  version: 1.0.0
+tags:
+  - name: 콘서트
+  - name: 사용자
+paths:
+  /concerts/{concertId}/booking-schedules:
+    get:
+      summary: 예약 가능 날짜 조회
+      deprecated: false
+      description: 콘서트ID를 기준으로 해당 공연의 예약 가능 일자 리스트를 조회한다.
+      tags:
+        - 콘서트
+      parameters:
+        - name: concertId
+          in: path
+          description: concertId 값을 넣는다
+          required: true
+          example: '{{$string.uuid}}'
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    description: 상태 코드
+                  message:
+                    type: string
+                    description: 결과메시지
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        scheduleId:
+                          type: string
+                          description: 스케줄 아이디
+                        hallId:
+                          type: string
+                          description: 홀 아이디
+                        performanceDate:
+                          type: string
+                          description: 공연 일자
+                        remainingSeatCount:
+                          type: integer
+                          description: 잔여좌석
+                      required:
+                        - scheduleId
+                        - hallId
+                        - performanceDate
+                        - remainingSeatCount
+                    description: 응답 결과
+                required:
+                  - code
+                  - message
+                  - data
+              example:
+                code: 200
+                message: OK
+                data:
+                  - scheduleId: ae78e9e9-ab14-4d1e-8da3-265f2da15367
+                    hallId: a951e772-fde0-446f-a85a-ef8aefe2ce5d
+                    performanceDate: '2025-12-01'
+                    remainingSeatCount: 100
+                  - scheduleId: a653a6c6-1124-4333-91af-bca6136dd4c8
+                    hallId: 243dcd98-962b-4a43-ad72-7ad3cbd2b5e6
+                    performanceDate: '2025-12-02'
+                    remainingSeatCount: 150
+          headers: {}
+        '404':
+          description: ''
+          content:
+            application/json:
+              schema:
+                title: ''
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    description: 상세 상태 값
+                  message:
+                    type: string
+                    description: 원인 코드
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties: {}
+                    description: 결과데이터
+                required:
+                  - code
+                  - message
+                  - data
+              example:
+                code: 4041
+                message: NOT_FOUND_CONCERT
+                data: []
+          headers: {}
+      security: []
+  /concerts/{concertId}/booking-schedules/{scheduleId}/available-seats:
+    get:
+      summary: 예약 가능 좌석 조회
+      deprecated: false
+      description: ''
+      tags:
+        - 콘서트
+      parameters:
+        - name: concertId
+          in: path
+          description: 콘서트 아이디
+          required: true
+          example: '{{$string.uuid}}'
+          schema:
+            type: string
+        - name: scheduleId
+          in: path
+          description: 스케줄 아이디(공연일자를 가지고 있는 데이터 로우의 아이디)
+          required: true
+          example: '{{$string.uuid}}'
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    description: 상태 코드
+                  message:
+                    type: string
+                    description: 결과메시지
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        seatId:
+                          type: string
+                          description: 좌석 아이디
+                        price:
+                          type: integer
+                          description: 좌석 가격
+                        isAvailable:
+                          type: boolean
+                          description: 예약 가능 여부
+                      required:
+                        - seatId
+                        - price
+                        - isAvailable
+                    description: 응답 결과
+                required:
+                  - code
+                  - message
+                  - data
+              example:
+                code: 200
+                message: OK
+                data:
+                  - seatId: 3f7e5e09-4a8e-46aa-8adf-5b5b1847a9d1
+                    price: 150000
+                    isAvailable: true
+                  - seatId: 419a6d8a-7307-4230-b348-bef4258267a1
+                    price: 150000
+                    isAvailable: true
+                  - seatId: 041c48c1-b8a3-4258-a8a8-352ea423a43a
+                    price: 150000
+                    isAvailable: false
+          headers: {}
+        '404':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    description: 상태 코드
+                  message:
+                    type: string
+                    description: 결과메시지
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties: {}
+                    description: 응답 결과
+                required:
+                  - code
+                  - message
+                  - data
+              examples:
+                '2':
+                  summary: 예시 1
+                  value:
+                    code: 4041
+                    message: NOT_FOUND_CONCERT
+                    data: []
+                '3':
+                  summary: 예시 2
+                  value:
+                    code: 4042
+                    message: NOT_FOUND_SCHEDULE
+                    data: []
+          headers: {}
+      security: []
+  /concerts/{concertId}/booking-schedules/{scheduleId}/bookings:
+    post:
+      summary: 좌석 예약 요청
+      deprecated: false
+      description: ''
+      tags:
+        - 콘서트
+      parameters:
+        - name: concertId
+          in: path
+          description: 콘서트 아이디
+          required: true
+          example: '{{$string.uuid}}'
+          schema:
+            type: string
+        - name: scheduleId
+          in: path
+          description: 스케줄 아이디
+          required: true
+          example: '{{$string.uuid}}'
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                seatIds:
+                  type: array
+                  items:
+                    type: string
+                    description: 예약 좌석 번호
+                  description: 좌석 번호 리스트
+              required:
+                - seatIds
+            example:
+              seatIds:
+                - ab11f573-676a-44c9-8ae4-f78a37c96b7b
+                - 18cf882f-3c14-4a02-b096-d9d9a6065790
+        required: true
+      responses:
+        '201':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    description: 상태 코드
+                  message:
+                    type: string
+                    description: 결과메시지
+                  data:
+                    type: object
+                    properties:
+                      bookingIds:
+                        type: array
+                        items:
+                          type: string
+                          description: 예약 결과 아이디
+                        description: 예약 결과 아이디 리스트
+                    description: 응답 결과
+                    required:
+                      - bookingIds
+                required:
+                  - code
+                  - message
+                  - data
+              example:
+                code: 200
+                message: OK
+                data:
+                  bookingIds:
+                    - 39970259-7809-42fa-93c4-1a9b611a23d6
+                    - 64a00cfd-9d6b-4b12-ad34-023ce88a2200
+                    - 08b5a179-ea37-4baa-8af3-df4e0026bbbe
+          headers: {}
+        '404':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    description: 상태 코드
+                  message:
+                    type: string
+                    description: 결과메시지
+                  data:
+                    type: object
+                    properties: {}
+                    description: 응답 결과
+                required:
+                  - code
+                  - message
+                  - data
+              examples:
+                '2':
+                  summary: 콘서트 정보 미존재
+                  value:
+                    code: 4041
+                    message: NOT_FOUND_CONCERT
+                    data: {}
+                '3':
+                  summary: 스케줄 정보 미존재
+                  value:
+                    code: 4042
+                    message: NOT_FOUND_SCHEDULE
+                    data: {}
+                '4':
+                  summary: 좌석 정보 미존재
+                  value:
+                    code: 4043
+                    message: NOT_FOUND_SEAT
+                    data: {}
+          headers: {}
+        '409':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    description: 상태 코드
+                  message:
+                    type: string
+                    description: 결과메시지
+                  data:
+                    type: object
+                    properties: {}
+                    description: 응답 결과
+                required:
+                  - code
+                  - message
+                  - data
+              example:
+                code: 4091
+                message: SEAT_ALREADY_RESERVED
+                data: {}
+          headers: {}
+      security: []
+  /users/point:
+    get:
+      summary: 포인트 조회
+      deprecated: false
+      description: 사용자의 포인트를 조회한다
+      tags:
+        - 사용자
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    description: 상태 코드
+                  message:
+                    type: string
+                    description: 결과메시지
+                  data:
+                    type: object
+                    properties:
+                      point:
+                        type: integer
+                        description: 사용자 보유 포인트
+                      updatedDate:
+                        type: string
+                        description: 최종 업데이트 일자
+                    required:
+                      - point
+                      - updatedDate
+                required:
+                  - code
+                  - message
+                  - data
+              example:
+                code: 200
+                message: ''
+                data:
+                  point: 100000
+                  updatedDate: '2026-01-29'
+          headers: {}
+        '401':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    description: 상태 코드
+                  message:
+                    type: string
+                    description: 결과메시지
+                  data:
+                    type: object
+                    properties: {}
+                required:
+                  - code
+                  - message
+                  - data
+              example:
+                code: 401
+                message: Unauthorized
+                data: {}
+          headers: {}
+      security:
+        - bearer: []
+  /users/point/charge:
+    post:
+      summary: 포인트 충전
+      deprecated: false
+      description: 사용자의 포인트를 충전한다
+      tags:
+        - 사용자
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount:
+                  type: integer
+                  description: 충전금액
+              required:
+                - amount
+            examples: {}
+        required: true
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    description: 상태 코드
+                  message:
+                    type: string
+                    description: 결과메시지
+                  data:
+                    type: object
+                    properties:
+                      point:
+                        type: integer
+                        description: 사용자 보유 포인트
+                      updatedDate:
+                        type: string
+                        description: 최종 업데이트 일자
+                    required:
+                      - point
+                      - updatedDate
+                required:
+                  - code
+                  - message
+                  - data
+              example:
+                code: 200
+                message: ''
+                data:
+                  point: 200000
+                  updatedDate: '2025-09-21'
+          headers: {}
+        '401':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    description: 상태 코드
+                  message:
+                    type: string
+                    description: 결과메시지
+                  data:
+                    type: object
+                    properties: {}
+                required:
+                  - code
+                  - message
+                  - data
+              example:
+                code: 401
+                message: Unauthorized
+                data: {}
+          headers: {}
+        '422':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: integer
+                    description: 상태 코드
+                  message:
+                    type: string
+                    description: 결과메시지
+                  data:
+                    type: object
+                    properties: {}
+                required:
+                  - code
+                  - message
+                  - data
+              example:
+                code: 422
+                message: INVALID_CHARGE_POLICY
+                data: {}
+          headers: {}
+      security:
+        - bearer: []
+components:
+  schemas: {}
+  responses: {}
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+servers: []
+security: []
